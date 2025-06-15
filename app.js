@@ -17,20 +17,14 @@ app.use(cors({
 
 
 // // Routes
-// const brandRoute = require('./routes/brandRoute');
-// app.use('/api/brand', brandRoute);
+const propertyRoute = require('./routes/propertyRoute');
+app.use('/api/property', propertyRoute);
 
-// const productRoute = require('./routes/productRoute');
-// app.use('/api/product', productRoute);
-
-// const categoryRoute = require('./routes/categoryRoute');
-// app.use('/api/category', categoryRoute);
-
-// const userRoute = require('./routes/userRoute')
-// app.use('/api/user', userRoute);
+const userRoute = require('./routes/userRoute')
+app.use('/api/user', userRoute);
 
 
-// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Sync DB & start server
 (async () => {
@@ -40,7 +34,7 @@ app.use(cors({
     console.log('Database & tables synced!');
 
     app.listen(9000, () => {
-      console.log('Server running on port 7001');
+      console.log('Server running on port 9000');
     });
   } catch (error) {
     console.error('Unable to sync database:', error);
