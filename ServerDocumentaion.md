@@ -14,6 +14,7 @@ jsonwebtoken (JWT authentication)
 multer (image uploads)
 
 dotenv (env variables)
+
 API Endpoints
 Auth
 
