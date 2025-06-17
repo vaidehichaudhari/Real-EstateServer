@@ -1,8 +1,7 @@
 const Property = require('../models/propertyModel');
-const User = require('../models/userModel');
 const { Op } = require('sequelize');
 
-// Get all properties
+// GET all properties
 const getAllProperties = async (req, res) => {
   try {
     const properties = await Property.findAll();
@@ -12,13 +11,15 @@ const getAllProperties = async (req, res) => {
   }
 };
 
-// Get property by ID
+// GET property by ID
 const getPropertyById = async (req, res) => {
   try {
     const { id } = req.params;
     const property = await Property.findByPk(id);
 
-    if (!property) return res.status(404).json({ message: 'Property not found' });
+    if (!property) {
+      return res.status(404).json({ message: 'Property not found' });
+    }
 
     res.status(200).json(property);
   } catch (error) {
@@ -26,7 +27,7 @@ const getPropertyById = async (req, res) => {
   }
 };
 
-// Create a new property
+// POST create new property (with Multer image upload)
 const createProperty = async (req, res) => {
   try {
     const {
@@ -37,8 +38,9 @@ const createProperty = async (req, res) => {
 
     const image = req.file?.filename;
 
-    if (!image) {
-      return res.status(400).json({ message: 'Image is required' });
+    // Validate required fields
+    if (!title || !image) {
+      return res.status(400).json({ message: 'Title and image are required' });
     }
 
     const newProperty = await Property.create({
@@ -61,34 +63,44 @@ const createProperty = async (req, res) => {
       country
     });
 
-    res.status(201).json(newProperty);
+    res.status(201).json({ message: 'Property created successfully', property: newProperty });
   } catch (error) {
     res.status(500).json({ error: 'Failed to create property', details: error.message });
   }
 };
 
-// Update property
+// PUT update existing property (with Multer image upload if provided)
 const updateProperty = async (req, res) => {
   try {
     const { id } = req.params;
     const property = await Property.findByPk(id);
 
-    if (!property) return res.status(404).json({ message: 'Property not found' });
+    if (!property) {
+      return res.status(404).json({ message: 'Property not found' });
+    }
+
+    const image = req.file?.filename;
+    if (image) {
+      req.body.image = image;
+    }
 
     await property.update(req.body);
+
     res.status(200).json({ message: 'Property updated successfully', property });
   } catch (error) {
     res.status(500).json({ error: 'Failed to update property', details: error.message });
   }
 };
 
-// Delete property
+// DELETE property
 const deleteProperty = async (req, res) => {
   try {
     const { id } = req.params;
     const property = await Property.findByPk(id);
 
-    if (!property) return res.status(404).json({ message: 'Property not found' });
+    if (!property) {
+      return res.status(404).json({ message: 'Property not found' });
+    }
 
     await property.destroy();
     res.status(200).json({ message: 'Property deleted successfully' });
@@ -97,10 +109,14 @@ const deleteProperty = async (req, res) => {
   }
 };
 
-// Search properties
+// GET search properties (title, city, or description)
 const searchProperties = async (req, res) => {
   try {
     const { query } = req.query;
+
+    if (!query || query.trim() === '') {
+      return res.status(400).json({ message: 'Search query is required' });
+    }
 
     const properties = await Property.findAll({
       where: {
@@ -112,16 +128,21 @@ const searchProperties = async (req, res) => {
       }
     });
 
+    if (properties.length === 0) {
+      return res.status(404).json({ message: 'No matching properties found' });
+    }
+
     res.status(200).json(properties);
   } catch (error) {
     res.status(500).json({ error: 'Search failed', details: error.message });
   }
 };
+
 module.exports = {
   getAllProperties,
   getPropertyById,
   createProperty,
   updateProperty,
   deleteProperty,
-  searchProperties,
+  searchProperties
 };

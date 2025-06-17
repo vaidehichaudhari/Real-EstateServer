@@ -14,11 +14,11 @@ const registerUser = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({ name, email, password: hashedPassword });
+    await User.create({ name, email, password: hashedPassword });
 
     res.status(201).json({ message: 'User registered successfully', success: true });
   } catch (error) {
-    res.status(500).json({ message: 'Registration failed', error: error.message });
+    res.status(500).json({ message: 'Registration failed', success: false, error: error.message });
   }
 };
 
@@ -28,13 +28,17 @@ const LoginUser = async (req, res) => {
 
   try {
     const user = await User.findOne({ where: { email } });
-    if (!user) return res.status(401).json({ message: 'User not found', success: false });
+    if (!user) {
+      return res.status(401).json({ message: 'User not found', success: false });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ message: 'Incorrect password', success: false });
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Incorrect password', success: false });
+    }
 
     const payload = { id: user.id, isAdmin: user.isAdmin };
-    const token = jwt.sign(payload, process.env.SECRET_KEY, { expiresIn: '2h' });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '2h' });
 
     res.status(200).json({
       message: 'Login successful',
@@ -48,25 +52,28 @@ const LoginUser = async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ message: 'Login failed', error: error.message });
+    res.status(500).json({ message: 'Login failed', success: false, error: error.message });
   }
 };
 
-// Get user info
+// Get logged-in user info
 const getUserInfo = async (req, res) => {
   try {
     const user = await User.findByPk(req.user.id, {
       attributes: ['id', 'name', 'email', 'isAdmin']
     });
 
-    if (!user) return res.status(401).json({ message: 'Unauthorized' });
+    if (!user) {
+      return res.status(401).json({ message: 'Unauthorized', success: false });
+    }
 
     res.status(200).json({
       message: 'User info fetched successfully',
+      success: true,
       loggedUser: user
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ message: 'Failed to fetch user info', success: false, error: error.message });
   }
 };
 
