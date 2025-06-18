@@ -26,7 +26,7 @@ const User = sequelize.define('User',{
     }
 },{
     tableName:'User',
-    timestamps:true         //at created updated table it is true, otherwise false
+    timestamps:false       //at created updated table it is true, otherwise false
 })
 
 

@@ -5,31 +5,35 @@ const { Op } = require('sequelize');
 const getAllProperties = async (req, res) => {
   try {
     const properties = await Property.findAll();
-    res.status(200).json(properties);
+    res.status(200).json({ success: true, properties });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch properties', details: error.message });
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch properties',
+      details: error.message,
+    });
   }
 };
 
 // GET property by ID
 const getPropertyById = async (req, res) => {
   try {
-    const { id } = req.params;
-    const property = await Property.findByPk(id);
-
+    const property = await Property.findByPk(req.params.id);
     if (!property) {
-      return res.status(404).json({ message: 'Property not found' });
+      return res.status(404).json({ success: false, message: "Property not found" });
     }
-
-    res.status(200).json(property);
+    res.status(200).json({ success: true, property });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to get property', details: error.message });
+    res.status(500).json({ success: false, message: "Error fetching property", error: error.message });
   }
 };
 
 // POST create new property (with Multer image upload)
 const createProperty = async (req, res) => {
   try {
+    console.log("Request Body:", req.body);
+    console.log("Request File:", req.file);
+
     const {
       title, price, city, description, type, size, area,
       bedroom, bathroom, garage, year, address, zip_code,
@@ -63,8 +67,9 @@ const createProperty = async (req, res) => {
       country
     });
 
-    res.status(201).json({ message: 'Property created successfully', property: newProperty });
+    res.status(201).json({ message: 'Property created successfully', id: newProperty.id });
   } catch (error) {
+    console.error("Create property error:", error);
     res.status(500).json({ error: 'Failed to create property', details: error.message });
   }
 };
@@ -79,6 +84,9 @@ const updateProperty = async (req, res) => {
       return res.status(404).json({ message: 'Property not found' });
     }
 
+    console.log("Request Body:", req.body);
+    console.log("Request File:", req.file);
+
     const image = req.file?.filename;
     if (image) {
       req.body.image = image;
@@ -88,6 +96,7 @@ const updateProperty = async (req, res) => {
 
     res.status(200).json({ message: 'Property updated successfully', property });
   } catch (error) {
+    console.error("Update property error:", error);
     res.status(500).json({ error: 'Failed to update property', details: error.message });
   }
 };

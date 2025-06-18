@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/getAllProperties', propertyController.getAllProperties);
 router.get('/getPropertyById/:id', propertyController.getPropertyById);
 router.post('/createProperty',   auth,isAdmin , multer.single('image'), propertyController.createProperty);
-router.put('/updateProperty/:id', auth,isAdmin , propertyController.updateProperty);
+router.put('/updateProperty/:id', auth,isAdmin ,multer.single('image'), propertyController.updateProperty);
 router.delete('/deleteProperty/:id',  auth,isAdmin , propertyController.deleteProperty);
 router.get('/search', propertyController.searchProperties);
 

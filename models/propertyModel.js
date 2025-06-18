@@ -83,7 +83,7 @@ const Property = sequelize.define('Property', {
  
 }, {
     tableName: 'properties',
-    timestamps: true
+    timestamps: false
 });
  
 
