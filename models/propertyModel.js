@@ -1,6 +1,6 @@
 const { DataTypes } = require('sequelize');
 const {sequelize} = require('../confiq/db');
- 
+// const Inquiry =require('./inquiryModel')
 
 const Property = sequelize.define('Property', {
     id: {
@@ -86,5 +86,6 @@ const Property = sequelize.define('Property', {
     timestamps: false
 });
  
+// Property.hasMany(Inquiry, { foreignKey: 'propertyId', as: 'inquiries' ,onDelete: 'CASCADE'});
 
 module.exports = Property;

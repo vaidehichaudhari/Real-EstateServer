@@ -17,10 +17,11 @@ app.use(cors({
 const propertyRoute = require('./routes/propertyRoute');
 app.use('/api/property', propertyRoute);
 
-const userRoute = require('./routes/userRoute')
+const userRoute = require('./routes/userRoute');
 app.use('/api/user', userRoute);
 
-
+const inquiryRoutes=require('./routes/inquiryRoutes');
+app.use('/api/inquiry',inquiryRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Sync DB & start server
