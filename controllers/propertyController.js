@@ -119,33 +119,46 @@ const deleteProperty = async (req, res) => {
 };
 
 // GET search properties (title, city, or description)
+
+// controllers/propertyController.js
 const searchProperties = async (req, res) => {
   try {
-    const { query } = req.query;
+    const { location = "", type = "", priceRange = "", purpose = "" } = req.query;
 
-    if (!query || query.trim() === '') {
-      return res.status(400).json({ message: 'Search query is required' });
+    const whereClause = {};
+
+    if (location) {
+      whereClause.city = { [Op.like]: `%${location}%` };
+    }
+    if (type) {
+      whereClause.type = type;
+    }
+    if (purpose) {
+      whereClause.purpose = purpose; // assuming this field exists in your model
     }
 
-    const properties = await Property.findAll({
-      where: {
-        [Op.or]: [
-          { title: { [Op.like]: `%${query}%` } },
-          { city: { [Op.like]: `%${query}%` } },
-          { description: { [Op.like]: `%${query}%` } }
-        ]
+    if (priceRange) {
+      if (priceRange === "5000000+") {
+        whereClause.price = { [Op.gte]: 5000000 };
+      } else {
+        const [min, max] = priceRange.split("-");
+        whereClause.price = {
+          ...(min && { [Op.gte]: Number(min) }),
+          ...(max && { [Op.lte]: Number(max) }),
+        };
       }
-    });
-
-    if (properties.length === 0) {
-      return res.status(404).json({ message: 'No matching properties found' });
     }
 
-    res.status(200).json(properties);
+    const properties = await Property.findAll({ where: whereClause });
+
+    return res.json({ success: true, properties });
   } catch (error) {
-    res.status(500).json({ error: 'Search failed', details: error.message });
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+
 
 module.exports = {
   getAllProperties,
