@@ -6,13 +6,13 @@ const { sequelize, connectDB } = require('./confiq/db');
 app.use(express.json());
 
 // For form data (e.g., file uploads + text fields)
-app.use(express.urlencoded({ extended: true }));
-app.use(cors({
-  origin: 'http://localhost:5173', // Frontend URL
-  credentials: true,               // Needed if using cookies or auth headers
-}));
+// app.use(express.urlencoded({ extended: true }));
+// app.use(cors({
+//   origin: 'http://localhost:5173', // Frontend URL
+//   credentials: true,               // Needed if using cookies or auth headers
+// }));
 
-
+ app.use(cors());
 // // Routes
 const propertyRoute = require('./routes/propertyRoute');
 app.use('/api/property', propertyRoute);

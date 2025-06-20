@@ -123,20 +123,46 @@ const deleteProperty = async (req, res) => {
 // controllers/propertyController.js
 const searchProperties = async (req, res) => {
   try {
-    const { location = "", type = "", priceRange = "", purpose = "" } = req.query;
+    const {
+      location = "",
+      type = "",
+      priceRange = "",
+      bedroom = ""
+    } = req.query;
 
     const whereClause = {};
 
+    // Location filter (city, state, or address)
     if (location) {
-      whereClause.city = { [Op.like]: `%${location}%` };
-    }
-    if (type) {
-      whereClause.type = type;
-    }
-    if (purpose) {
-      whereClause.purpose = purpose; // assuming this field exists in your model
+      whereClause[Op.or] = [
+        { city: { [Op.like]: `%${location}%` } },
+        { state: { [Op.like]: `%${location}%` } },
+        { address: { [Op.like]: `%${location}%` } }
+      ];
     }
 
+    // Type filter
+    let dbType = null;
+if (type) {
+  if (type.toLowerCase() === "rent") dbType = "For Rent";
+  else if (type.toLowerCase() === "sale") dbType = "For Sale";
+  else dbType = type; // fallback in case exact match sent
+}
+
+if (dbType) {
+  whereClause.type = dbType;
+}
+
+  if (bedroom) {
+  if (bedroom === "4+") {
+    whereClause.bedroom = { [Op.gte]: 4 };
+  } else if (bedroom === "3+") {
+    whereClause.bedroom = { [Op.gte]: 3 };
+  } else {
+    whereClause.bedroom = Number(bedroom);
+  }
+}
+    // Price range filter
     if (priceRange) {
       if (priceRange === "5000000+") {
         whereClause.price = { [Op.gte]: 5000000 };
@@ -144,7 +170,7 @@ const searchProperties = async (req, res) => {
         const [min, max] = priceRange.split("-");
         whereClause.price = {
           ...(min && { [Op.gte]: Number(min) }),
-          ...(max && { [Op.lte]: Number(max) }),
+          ...(max && { [Op.lte]: Number(max) })
         };
       }
     }
@@ -157,7 +183,6 @@ const searchProperties = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error" });
   }
 };
-
 
 
 module.exports = {
